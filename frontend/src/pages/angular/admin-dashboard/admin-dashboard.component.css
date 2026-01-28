@@ -1,0 +1,8 @@
+/* Admin Dashboard specific styles */
+/* Note: Most styling is handled by Tailwind CSS in the HTML template */
+
+.card {
+    @apply bg-white p-6 rounded-2xl border border-slate-100 shadow-sm transition-all;
+}
+
+/* Add any custom animations or overrides here if needed */

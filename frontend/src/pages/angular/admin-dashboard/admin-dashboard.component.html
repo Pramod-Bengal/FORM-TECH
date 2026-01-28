@@ -1,0 +1,219 @@
+<div class="max-w-6xl mx-auto px-6 font-['Outfit']" *ngIf="stats; else loadingTpl">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-slate-800 italic tracking-tight">MEDIATOR CONTROL PANEL</h1>
+            <p class="text-gray-500 font-medium">Overseeing agricultural trade & logistics</p>
+        </div>
+
+        <div class="flex bg-gray-100 p-1.5 rounded-2xl ring-1 ring-gray-200">
+            <button (click)="setActiveTab('moderation')"
+                [class]="activeTab === 'moderation' ? 'bg-white shadow-xl text-primary-600' : 'text-gray-500 hover:text-gray-700'"
+                class="px-6 py-2.5 rounded-xl transition-all font-black text-xs tracking-widest">
+                MODERATION
+            </button>
+            <button (click)="setActiveTab('activity')"
+                [class]="activeTab === 'activity' ? 'bg-white shadow-xl text-primary-600' : 'text-gray-500 hover:text-gray-700'"
+                class="px-6 py-2.5 rounded-xl transition-all font-black text-xs tracking-widest">
+                GLOBAL ACTIVITY
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <!-- Admin Savings -->
+        <div class="card !bg-slate-900 border-none group p-6 rounded-2xl relative overflow-hidden">
+            <!-- Icon Placeholder (Lucide icons need a component or SVG) -->
+            <div class="text-primary-400 mb-4 group-hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                    <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+            </div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin Savings</p>
+            <p class="text-3xl font-black text-white italic">₹{{ stats.total_savings | number }}</p>
+            <p class="text-[10px] text-primary-400 font-bold mt-1">LOGISTICS FEE (₹5/KG)</p>
+        </div>
+
+        <!-- Trade Network -->
+        <div class="card bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div class="text-blue-500 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Trade Network</p>
+            <p class="text-2xl font-black text-slate-800 italic">{{ stats.total_farmers }} Farmers · {{
+                stats.total_buyers }} Buyers</p>
+        </div>
+
+        <!-- Total Volume -->
+        <div class="card bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div class="text-orange-500 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+            </div>
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Volume</p>
+            <p class="text-2xl font-black text-slate-800 italic">₹{{ stats.total_revenue | number }}</p>
+        </div>
+
+        <!-- Pending Verification -->
+        <div class="card bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div class="text-purple-500 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+            </div>
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pending Verification</p>
+            <p class="text-2xl font-black text-slate-800 italic">{{ pendingProducts.length }}</p>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div [ngSwitch]="activeTab">
+
+        <!-- Moderation Tab -->
+        <div *ngSwitchCase="'moderation'">
+            <h2 class="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
+                <svg class="text-primary-600" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
+                    <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                    </path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                CROP VERIFICATION QUEUE
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div *ngFor="let p of pendingProducts" @fadeIn
+                    class="card p-0 overflow-hidden group bg-white rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="h-56 bg-gray-100 relative">
+                        <ng-container *ngIf="p.image; else noImage">
+                            <img [src]="'http://localhost:5000' + p.image" class="w-full h-full object-cover" />
+                        </ng-container>
+                        <ng-template #noImage>
+                            <div class="w-full h-full flex items-center justify-center text-gray-300 italic">No
+                                Reference Photo</div>
+                        </ng-template>
+
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                            <div class="text-white">
+                                <p class="text-[10px] font-black uppercase tracking-widest opacity-80">Farmer: {{
+                                    p.farmer_name }}</p>
+                                <h3 class="text-2xl font-black italic">{{ p.name }}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Farmer Base
+                                </p>
+                                <p class="text-xl font-bold text-slate-700">₹{{ p.base_price }}/kg</p>
+                            </div>
+                            <div class="h-8 w-[1px] bg-gray-100 rotate-12"></div>
+                            <div class="text-right">
+                                <p class="text-[10px] font-black text-primary-600 uppercase tracking-widest">Buyer Final
+                                </p>
+                                <p class="text-2xl font-black text-primary-700 italic">₹{{ p.final_price }}/kg</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button (click)="handleAction(p.id, 'refused')"
+                                class="flex-1 py-3 rounded-xl border-2 border-red-50 text-red-500 font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-50 transition-all">
+                                <!-- XCircle Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                                </svg>
+                                Refuse
+                            </button>
+                            <button (click)="handleAction(p.id, 'approved')"
+                                class="flex-1 bg-primary-600 text-white rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:shadow-xl hover:shadow-primary-100 transition-all">
+                                <!-- ShieldCheck Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <polyline points="9 12 11 14 15 10"></polyline>
+                                </svg>
+                                Approve
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="pendingProducts.length === 0"
+                class="p-32 text-center card bg-gray-50/50 border-dashed border-2 rounded-2xl">
+                <div class="mx-auto text-gray-200 mb-4 inline-block">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <polyline points="9 12 11 14 15 10"></polyline>
+                    </svg>
+                </div>
+                <p class="text-gray-400 font-bold uppercase tracking-widest italic">Verification queue is clear</p>
+            </div>
+        </div>
+
+        <!-- Activity Tab -->
+        <div *ngSwitchCase="'activity'">
+            <div class="card !p-0 overflow-hidden bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50">
+                    <h2 class="text-xl font-black text-slate-800 flex items-center gap-2 italic">
+                        LIVE NETWORK FEED
+                    </h2>
+                </div>
+                <div class="p-4">
+                    <div *ngFor="let act of stats.recent_activity"
+                        class="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl transition-all">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-primary-100 flex items-center justify-center text-primary-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <path d="M16 10a4 4 0 0 1-8 0"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-slate-800">{{ act.detail }}</p>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ act.date }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-black text-primary-600">+₹5.00 Logistics</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #loadingTpl>
+    <div class="flex items-center justify-center h-screen">Loading Mediator Control Panel...</div>
+</ng-template>
