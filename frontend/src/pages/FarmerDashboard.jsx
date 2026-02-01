@@ -19,7 +19,7 @@ const FarmerDashboard = () => {
 
     const fetchMyProducts = async () => {
         try {
-            const { data } = await axios.get('http://localhost:5000/api/farmer/my-products', {
+            const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/farmer/my-products`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setProducts(data);
@@ -38,7 +38,7 @@ const FarmerDashboard = () => {
             formData.append('quantity', newProduct.quantity);
             if (newProduct.image) formData.append('image', newProduct.image);
 
-            const { data } = await axios.post('http://localhost:5000/api/farmer/products', formData, {
+            const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/farmer/products`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
@@ -119,7 +119,7 @@ const FarmerDashboard = () => {
                         <motion.div layout key={p.id} className="card overflow-hidden !p-0">
                             <div className="h-48 bg-gray-100 relative">
                                 {p.image ? (
-                                    <img src={`http://localhost:5000${p.image}`} alt={p.name} className="w-full h-full object-cover" />
+                                    <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${p.image}`} alt={p.name} className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-300">No Image</div>
                                 )}

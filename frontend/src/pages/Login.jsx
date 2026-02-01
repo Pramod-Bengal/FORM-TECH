@@ -15,7 +15,7 @@ const Auth = () => {
         setLoading(true);
         try {
             if (mode === 'login') {
-                const { data } = await axios.post('http://localhost:5000/api/auth/login', {
+                const { data } = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/login`, {
                     email: formData.email,
                     password: formData.password
                 });
@@ -26,7 +26,7 @@ const Auth = () => {
                 else if (data.role === 'admin') navigate('/admin');
                 else navigate('/buyer');
             } else {
-                await axios.post('http://localhost:5000/api/auth/register', formData);
+                await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/register`, formData);
                 alert('Account created! Please sign in.');
                 setMode('login');
             }

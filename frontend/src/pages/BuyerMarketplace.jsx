@@ -20,7 +20,7 @@ const BuyerMarketplace = () => {
 
     const fetchProducts = async () => {
         try {
-            const { data } = await axios.get('http://localhost:5000/api/buyer/products');
+            const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/buyer/products`);
             setProducts(data);
         } catch (err) {
             console.error('Failed to fetch products');
@@ -29,7 +29,7 @@ const BuyerMarketplace = () => {
 
     const fetchOrders = async () => {
         try {
-            const { data } = await axios.get('http://localhost:5000/api/buyer/my-orders', {
+            const { data } = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/buyer/my-orders`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setOrders(data);
@@ -45,7 +45,7 @@ const BuyerMarketplace = () => {
         }
         setLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/buyer/order', {
+            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/buyer/order`, {
                 product_id: selectedProduct.id,
                 quantity: orderQuantity
             }, {
@@ -110,7 +110,7 @@ const BuyerMarketplace = () => {
                             >
                                 <div className="h-40 bg-gray-100 rounded-2xl overflow-hidden mb-4 relative">
                                     {p.image ? (
-                                        <img src={`http://localhost:5000${p.image}`} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                        <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${p.image}`} alt={p.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-300 italic">No Photo</div>
                                     )}
@@ -191,7 +191,7 @@ const BuyerMarketplace = () => {
                             </button>
                             <div className="w-full md:w-1/2 h-64 md:h-auto bg-gray-100">
                                 {selectedProduct.image ? (
-                                    <img src={`http://localhost:5000${selectedProduct.image}`} className="w-full h-full object-cover" />
+                                    <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${selectedProduct.image}`} className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center italic text-gray-400">No Photo</div>
                                 )}

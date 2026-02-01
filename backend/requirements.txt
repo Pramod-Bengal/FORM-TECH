@@ -7,3 +7,4 @@ pillow
 dnspython
 python-dotenv
 certifi
+gunicorn

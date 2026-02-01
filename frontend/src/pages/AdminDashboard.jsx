@@ -18,8 +18,8 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         try {
             const [productsRes, statsRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/admin/pending-products', { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get('http://localhost:5000/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } })
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/pending-products`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/stats`, { headers: { Authorization: `Bearer ${token}` } })
             ]);
             setPendingProducts(productsRes.data);
             setStats(statsRes.data);
@@ -30,7 +30,7 @@ const AdminDashboard = () => {
 
     const handleAction = async (productId, action) => {
         try {
-            await axios.post('http://localhost:5000/api/admin/product-action',
+            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/product-action`,
                 { product_id: productId, action },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -102,7 +102,7 @@ const AdminDashboard = () => {
                             <motion.div layout key={p.id} className="card p-0 overflow-hidden group">
                                 <div className="h-56 bg-gray-100 relative">
                                     {p.image ? (
-                                        <img src={`http://localhost:5000${p.image}`} className="w-full h-full object-cover" />
+                                        <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${p.image}`} className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-300 italic">No Reference Photo</div>
                                     )}
