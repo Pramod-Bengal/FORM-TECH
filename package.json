@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@google-pay/button-react": "^3.2.1",
+    "react-hot-toast": "^2.6.0"
+  }
+}

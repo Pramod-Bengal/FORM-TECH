@@ -1,75 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --primary-50: #f0fdf4;
-  --primary-100: #dcfce7;
-  --primary-500: #22c55e;
-  --primary-600: #16a34a;
-  --primary-700: #15803d;
-  --primary-900: #14532d;
-}
-
-body {
-  @apply text-slate-900 overflow-x-hidden bg-[#fafafa];
-  font-family: 'Inter', sans-serif;
-}
-
-h1,
-h2,
-h3,
-.font-heading {
-  font-family: 'Outfit', sans-serif;
-}
-
-.glass {
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-}
-
-.btn-primary {
-  @apply px-8 py-3.5 bg-gradient-to-br from-primary-600 to-primary-700 text-white rounded-2xl transition-all duration-500 font-bold active:scale-95;
-  box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.3);
-}
-
-.btn-primary:hover {
-  box-shadow: 0 20px 25px -5px rgba(22, 163, 74, 0.4);
-  transform: translateY(-2px);
-}
-
-.input-field {
-  @apply w-full px-5 py-4 rounded-2xl border-2 border-gray-50 bg-gray-50/50 focus:bg-white focus:border-primary-500/30 outline-none transition-all duration-300 font-medium;
-}
-
-.input-field:focus {
-  box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.1);
+@layer base {
+    body {
+        @apply bg-slate-50 text-slate-900;
+    }
 }
 
 .card {
-  @apply bg-white p-8 rounded-[2.5rem] border border-gray-100 transition-all duration-700;
-  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.05);
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transition-all hover:shadow-md;
 }
 
-.card:hover {
-  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.1);
-  transform: translateY(-4px);
+.input-field {
+    @apply w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 transition-all;
 }
 
-/* Custom Utilities */
-.text-gradient {
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  background-image: linear-gradient(to bottom right, #16a34a, #14532d);
+.btn-primary {
+    @apply bg-primary-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-primary-700 active:scale-95 transition-all shadow-md shadow-primary-100;
 }
 
-.uppercase-headings h1,
-.uppercase-headings h2 {
-  @apply uppercase tracking-tight font-black italic;
+.glass {
+    @apply bg-white/80 backdrop-blur-md border-b border-gray-100;
 }

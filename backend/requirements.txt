@@ -1,10 +1,13 @@
 flask
-mongoengine
 flask-cors
 flask-jwt-extended
-werkzeug
-pillow
-dnspython
+mongoengine
 python-dotenv
 certifi
+dnspython
 gunicorn
+werkzeug
+tensorflow
+numpy
+pillow
+keras

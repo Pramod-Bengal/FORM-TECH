@@ -1,183 +1,233 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ShieldCheck, XCircle, TrendingUp, Users, Package, ShoppingBag, Clock } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldCheck, CheckCircle, XCircle, TrendingUp, Users, Package, ShoppingBag } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const AdminDashboard = () => {
-    const [pendingProducts, setPendingProducts] = useState([]);
     const [stats, setStats] = useState(null);
-    const [activeTab, setActiveTab] = useState('moderation');
-    const [loading, setLoading] = useState(false);
-
+    const [pendingProducts, setPendingProducts] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [transactions, setTransactions] = useState([]);
+    const [activeTab, setActiveTab] = useState('overview'); // overview, users, transactions
+    const [loading, setLoading] = useState(true);
     const token = localStorage.getItem('token');
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
     useEffect(() => {
-        fetchData();
+        fetchStats();
+        fetchPending();
     }, []);
 
-    const fetchData = async () => {
+    useEffect(() => {
+        if (activeTab === 'users') fetchUsers();
+        if (activeTab === 'transactions') fetchTransactions();
+    }, [activeTab]);
+
+    const fetchStats = async () => {
         try {
-            const [productsRes, statsRes] = await Promise.all([
-                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/pending-products`, { headers: { Authorization: `Bearer ${token}` } }),
-                axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/stats`, { headers: { Authorization: `Bearer ${token}` } })
-            ]);
-            setPendingProducts(productsRes.data);
-            setStats(statsRes.data);
-        } catch (err) {
-            console.error('Failed to fetch admin data');
-        }
+            const { data } = await axios.get(`${API_URL}/api/admin/stats`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setStats(data);
+            setLoading(false);
+        } catch (err) { console.error(err); setLoading(false); }
     };
 
-    const handleAction = async (productId, action) => {
+    const fetchPending = async () => {
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/admin/product-action`,
-                { product_id: productId, action },
+            const { data } = await axios.get(`${API_URL}/api/admin/pending-products`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setPendingProducts(data);
+        } catch (err) { console.error(err); }
+    };
+
+    const fetchUsers = async () => {
+        try {
+            const { data } = await axios.get(`${API_URL}/api/admin/users`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUsers(data);
+        } catch (err) { toast.error("Failed to load users"); }
+    };
+
+    const fetchTransactions = async () => {
+        try {
+            const { data } = await axios.get(`${API_URL}/api/admin/transactions`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setTransactions(data);
+        } catch (err) { toast.error("Failed to load transactions"); }
+    };
+
+    const handleAction = async (id, action) => {
+        try {
+            await axios.post(`${API_URL}/api/admin/product-action`,
+                { product_id: id, action },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            fetchData();
-        } catch (err) {
-            alert('Action failed');
-        }
+            toast.success(`Product ${action} successfully`);
+            fetchPending();
+            fetchStats();
+        } catch (err) { toast.error('Action failed'); }
     };
 
-    if (!stats) return <div className="flex items-center justify-center h-screen">Loading Mediator Control Panel...</div>;
+    if (loading) return <div className="p-10 text-center">Loading Admin Panel...</div>;
 
     return (
-        <div className="max-w-6xl mx-auto px-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-                <div>
-                    <h1 className="text-3xl font-black text-slate-800 font-['Outfit'] italic tracking-tight">MEDIATOR CONTROL PANEL</h1>
-                    <p className="text-gray-500 font-medium">Overseeing agricultural trade & logistics</p>
-                </div>
+        <div className="max-w-7xl mx-auto px-6 py-8">
+            <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
+                <ShieldCheck className="text-primary-600" /> Admin Dashboard
+            </h1>
 
-                <div className="flex bg-gray-100 p-1.5 rounded-2xl ring-1 ring-gray-200">
+            {/* Tabs */}
+            <div className="flex gap-4 mb-8 border-b border-gray-200">
+                {['overview', 'users', 'transactions'].map(tab => (
                     <button
-                        onClick={() => setActiveTab('moderation')}
-                        className={`px-6 py-2.5 rounded-xl transition-all font-black text-xs tracking-widest ${activeTab === 'moderation' ? 'bg-white shadow-xl text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`pb-2 px-4 font-bold capitalize transition-colors ${activeTab === tab
+                            ? 'text-primary-600 border-b-2 border-primary-600'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
                     >
-                        MODERATION
+                        {tab}
                     </button>
-                    <button
-                        onClick={() => setActiveTab('activity')}
-                        className={`px-6 py-2.5 rounded-xl transition-all font-black text-xs tracking-widest ${activeTab === 'activity' ? 'bg-white shadow-xl text-primary-600' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                        GLOBAL ACTIVITY
-                    </button>
-                </div>
+                ))}
             </div>
 
-            {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-                <div className="card !bg-slate-900 border-none group">
-                    <TrendingUp className="text-primary-400 mb-4 group-hover:scale-110 transition-transform" size={28} />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Admin Savings</p>
-                    <p className="text-3xl font-black text-white font-['Outfit'] italic">₹{stats.total_savings.toLocaleString()}</p>
-                    <p className="text-[10px] text-primary-400 font-bold mt-1">LOGISTICS FEE (₹5/KG)</p>
-                </div>
-                <div className="card">
-                    <Users className="text-blue-500 mb-4" size={28} />
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Trade Network</p>
-                    <p className="text-2xl font-black text-slate-800 font-['Outfit'] italic">{stats.total_farmers} Farmers · {stats.total_buyers} Buyers</p>
-                </div>
-                <div className="card">
-                    <ShoppingBag className="text-orange-500 mb-4" size={28} />
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Volume</p>
-                    <p className="text-2xl font-black text-slate-800 font-['Outfit'] italic">₹{stats.total_revenue.toLocaleString()}</p>
-                </div>
-                <div className="card">
-                    <Clock className="text-purple-500 mb-4" size={28} />
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pending Verification</p>
-                    <p className="text-2xl font-black text-slate-800 font-['Outfit'] italic">{pendingProducts.length}</p>
-                </div>
-            </div>
-
-            {activeTab === 'moderation' ? (
-                <div>
-                    <h2 className="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">
-                        <Package className="text-primary-600" /> CROP VERIFICATION QUEUE
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {pendingProducts.map(p => (
-                            <motion.div layout key={p.id} className="card p-0 overflow-hidden group">
-                                <div className="h-56 bg-gray-100 relative">
-                                    {p.image ? (
-                                        <img src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${p.image}`} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center text-gray-300 italic">No Reference Photo</div>
-                                    )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
-                                        <div className="text-white">
-                                            <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Farmer: {p.farmer_name}</p>
-                                            <h3 className="text-2xl font-black italic">{p.name}</h3>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="p-6">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <div>
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Farmer Base</p>
-                                            <p className="text-xl font-bold text-slate-700">₹{p.base_price}/kg</p>
-                                        </div>
-                                        <div className="h-8 w-[1px] bg-gray-100 rotate-12"></div>
-                                        <div className="text-right">
-                                            <p className="text-[10px] font-black text-primary-600 uppercase tracking-widest">Buyer Final</p>
-                                            <p className="text-2xl font-black text-primary-700 italic">₹{p.final_price}/kg</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={() => handleAction(p.id, 'refused')}
-                                            className="flex-1 py-3 rounded-xl border-2 border-red-50 text-red-500 font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-red-50 transition-all"
-                                        >
-                                            <XCircle size={16} /> Refuse
-                                        </button>
-                                        <button
-                                            onClick={() => handleAction(p.id, 'approved')}
-                                            className="flex-1 bg-primary-600 text-white rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:shadow-xl hover:shadow-primary-100 transition-all"
-                                        >
-                                            <ShieldCheck size={16} /> Approve
-                                        </button>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
+            {/* Overview Tab */}
+            {activeTab === 'overview' && stats && (
+                <>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+                        <StatCard icon={<Users />} label="Total Farmers" value={stats.total_farmers} color="bg-blue-500" />
+                        <StatCard icon={<ShoppingBag />} label="Total Buyers" value={stats.total_buyers} color="bg-purple-500" />
+                        <StatCard icon={<Package />} label="Products Listed" value={stats.total_products} color="bg-orange-500" />
+                        <StatCard icon={<TrendingUp />} label="Total Revenue" value={`₹${stats.total_revenue}`} color="bg-green-600" />
                     </div>
-                    {pendingProducts.length === 0 && (
-                        <div className="p-32 text-center card bg-gray-50/50 border-dashed border-2">
-                            <ShieldCheck className="mx-auto text-gray-200 mb-4" size={64} />
-                            <p className="text-gray-400 font-bold uppercase tracking-widest italic">Verification queue is clear</p>
+
+                    <div className="mb-12">
+                        <h2 className="text-xl font-bold mb-4">Pending Approvals ({pendingProducts.length})</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {pendingProducts.length === 0 ? <p className="text-gray-400">No pending products.</p> :
+                                pendingProducts.map(p => (
+                                    <div key={p.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
+                                        <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                                            {p.image ? <img src={`${API_URL}${p.image}`} className="w-full h-full object-cover" /> : <div className="h-full flex items-center justify-center text-xs">No Img</div>}
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="font-bold text-lg">{p.name}</h3>
+                                            <p className="text-sm text-gray-500">By: {p.farmer_name}</p>
+                                            <p className="text-sm font-semibold mt-1">₹{p.final_price}/kg • {p.quantity}kg</p>
+                                            <div className="flex gap-2 mt-3">
+                                                <button onClick={() => handleAction(p.id, 'approved')} className="flex-1 bg-green-50 text-green-700 py-1 rounded-lg text-sm font-bold hover:bg-green-100">Approve</button>
+                                                <button onClick={() => handleAction(p.id, 'refused')} className="flex-1 bg-red-50 text-red-700 py-1 rounded-lg text-sm font-bold hover:bg-red-100">Refuse</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
                         </div>
-                    )}
-                </div>
-            ) : (
-                <div className="card !p-0 overflow-hidden">
-                    <div className="px-8 py-6 border-b border-gray-100 bg-gray-50/50">
-                        <h2 className="text-xl font-black text-slate-800 flex items-center gap-2 italic">
-                            LIVE NETWORK FEED
-                        </h2>
                     </div>
-                    <div className="p-4">
-                        {stats.recent_activity.map((act, idx) => (
-                            <div key={idx} className="flex items-center gap-4 p-4 hover:bg-gray-50 rounded-2xl transition-all">
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${act.type === 'order' ? 'bg-primary-100 text-primary-600' : 'bg-blue-100 text-blue-600'}`}>
-                                    {act.type === 'order' ? <ShoppingBag size={20} /> : <Package size={20} />}
+
+                    <div>
+                        <h2 className="text-xl font-bold mb-4">Recent Network Activity</h2>
+                        <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50">
+                            {stats.recent_activity.map((act, idx) => (
+                                <div key={idx} className="p-4 flex items-center justify-between hover:bg-gray-50">
+                                    <div>
+                                        <p className="font-medium text-gray-800">{act.detail}</p>
+                                        <p className="text-xs text-gray-400">{act.date}</p>
+                                    </div>
+                                    <span className="text-sm font-bold text-primary-600">{act.amount}</span>
                                 </div>
-                                <div className="flex-1">
-                                    <p className="font-bold text-slate-800">{act.detail}</p>
-                                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{act.date}</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className={`text-sm font-black ${act.type === 'order' ? 'text-primary-600' : 'text-blue-500'}`}>{act.amount}</p>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                    </div>
+                </>
+            )}
+
+            {/* Users Tab */}
+            {activeTab === 'users' && (
+                <div>
+                    <h2 className="text-xl font-bold mb-4">User Directory</h2>
+                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50 text-gray-500 text-sm">
+                                <tr>
+                                    <th className="p-4">Name</th>
+                                    <th className="p-4">Role</th>
+                                    <th className="p-4">Email</th>
+                                    <th className="p-4">Joined</th>
+                                    <th className="p-4">Activity</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {users.map(u => (
+                                    <tr key={u.id} className="hover:bg-gray-50">
+                                        <td className="p-4 font-medium">{u.name}</td>
+                                        <td className="p-4"><span className={`px-2 py-1 rounded-full text-xs font-bold ${u.role === 'farmer' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>{u.role.toUpperCase()}</span></td>
+                                        <td className="p-4 text-gray-500">{u.email}</td>
+                                        <td className="p-4 text-gray-400 text-sm">{u.joined}</td>
+                                        <td className="p-4 text-sm">
+                                            {u.role === 'farmer' ?
+                                                <span>{u.stats.listings} Listings ({u.stats.listings_active} Active)</span> :
+                                                <span>{u.stats.orders_placed} Orders (₹{u.stats.total_spent})</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* Transactions Tab */}
+            {activeTab === 'transactions' && (
+                <div>
+                    <h2 className="text-xl font-bold mb-4">Transaction History</h2>
+                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50 text-gray-500 text-sm">
+                                <tr>
+                                    <th className="p-4">Date</th>
+                                    <th className="p-4">Buyer</th>
+                                    <th className="p-4">Product</th>
+                                    <th className="p-4">Farmer</th>
+                                    <th className="p-4">Amount</th>
+                                    <th className="p-4">Method</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {transactions.map(t => (
+                                    <tr key={t.id} className="hover:bg-gray-50">
+                                        <td className="p-4 text-gray-500 text-sm">{t.date}</td>
+                                        <td className="p-4 font-medium">{t.buyer}</td>
+                                        <td className="p-4">{t.quantity}kg {t.product}</td>
+                                        <td className="p-4 text-gray-600">{t.farmer}</td>
+                                        <td className="p-4 font-bold text-green-600">₹{t.amount}</td>
+                                        <td className="p-4">
+                                            <span className="bg-gray-100 px-2 py-1 rounded text-xs font-medium text-gray-600">{t.payment_method}</span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             )}
         </div>
     );
 };
+
+const StatCard = ({ icon, label, value, color }) => (
+    <div className={`${color} text-white p-6 rounded-2xl shadow-lg`}>
+        <div className="flex justify-between items-start mb-4">
+            <div className="bg-white/20 p-2 rounded-lg">{icon}</div>
+        </div>
+        <p className="text-white/80 text-sm">{label}</p>
+        <h3 className="text-3xl font-bold">{value}</h3>
+    </div>
+);
 
 export default AdminDashboard;

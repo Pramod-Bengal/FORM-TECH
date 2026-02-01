@@ -1,21 +1,22 @@
-# General
+# Node modules
+node_modules/
+dist/
+build/
 .DS_Store
-.idea
-.vscode
 
-# Backend
-backend/__pycache__/
-backend/*.pyc
-backend/.env
-backend/venv/
-backend/.pytest_cache/
-backend/instance/
+# Python
+__pycache__/
+*.py[cod]
+venv/
+env/
+.env
+instance/
+.pytest_cache/
+
+# Uploads
 backend/uploads/
-
-# Frontend
-frontend/node_modules/
 frontend/dist/
-frontend/.env
-frontend/.env.local
-frontend/coverage/
-frontend/build/
+
+# Logs
+*.log
+npm-debug.log*
