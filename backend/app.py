@@ -17,7 +17,8 @@ load_dotenv()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
+    # Allow all origins, methods, and headers for development simplicity
+    CORS(app, resources={r"/*": {"origins": "*", "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"], "allow_headers": "*"}})
 
     # MongoDB Atlas Connection
     MONGO_URI = os.getenv('MONGO_URI')
