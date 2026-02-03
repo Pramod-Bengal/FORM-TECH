@@ -255,13 +255,15 @@ def analyze_quality():
         if 'image' not in request.files:
             return jsonify({"msg": "No image uploaded"}), 400
         
-        file = request.files['image']
+        # file = request.files['image']
         veg_name = request.form.get('vegetable_name', 'Vegetable').lower().strip()
+        filename = request.files['image'].filename or "unknown.jpg"
         
-        # Save temp file for analysis
-        filename = secure_filename(file.filename)
-        temp_path = os.path.join(current_app.config['UPLOAD_FOLDER'], "temp_" + filename)
-        file.save(temp_path)
+        # SKIP SAVING FILE TO AVOID 500 ERRORS ON READ-ONLY/FULL DISKS
+        # filename = secure_filename(file.filename)
+        # temp_path = os.path.join(current_app.config['UPLOAD_FOLDER'], "temp_" + filename)
+        # file.save(temp_path)
+        pass # Optimization: We don't need the physical file for this mock analysis
 
         try:
             # ---------------------------------------------------------
@@ -298,9 +300,10 @@ def analyze_quality():
             })
 
         finally:
-            # Cleanup temp file
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
+            # Cleanup temp file if it existed (commented out as per new logic)
+            # if os.path.exists(temp_path):
+            #     os.remove(temp_path)
+            pass
             
     except Exception as e:
         print(f"Analysis Error: {e}")
