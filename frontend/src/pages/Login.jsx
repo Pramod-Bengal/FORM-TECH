@@ -26,7 +26,7 @@ const Login = () => {
             else if (data.role === 'farmer') navigate('/dashboard/farmer');
             else navigate('/dashboard/buyer');
 
-            window.location.reload(); // To update Navbar state
+            window.dispatchEvent(new Event('auth-change')); // Update Navbar without reload
         } catch (err) {
             toast.error('Login failed: Invalid credentials');
         } finally {

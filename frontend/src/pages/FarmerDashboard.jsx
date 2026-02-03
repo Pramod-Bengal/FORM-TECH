@@ -82,12 +82,12 @@ const FarmerDashboard = () => {
 
     return (
         <div className="max-w-6xl mx-auto px-6 pt-24 pb-8">
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold">Farmer Dashboard</h1>
                     <p className="text-gray-500">Manage your produce</p>
                 </div>
-                <button onClick={() => setShowAddForm(true)} className="bg-primary-600 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-primary-700">
+                <button onClick={() => setShowAddForm(true)} className="w-full md:w-auto bg-primary-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary-700 shadow-lg shadow-primary-200">
                     <Plus size={20} /> Add Crop
                 </button>
             </div>
