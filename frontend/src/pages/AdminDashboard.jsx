@@ -150,8 +150,8 @@ const AdminDashboard = () => {
             {activeTab === 'users' && (
                 <div>
                     <h2 className="text-xl font-bold mb-4">User Directory</h2>
-                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                        <table className="w-full text-left">
+                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden overflow-x-auto">
+                        <table className="w-full text-left min-w-[600px]">
                             <thead className="bg-gray-50 text-gray-500 text-sm">
                                 <tr>
                                     <th className="p-4">Name</th>
@@ -186,8 +186,8 @@ const AdminDashboard = () => {
             {activeTab === 'transactions' && (
                 <div>
                     <h2 className="text-xl font-bold mb-4">Transaction History</h2>
-                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                        <table className="w-full text-left">
+                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden overflow-x-auto">
+                        <table className="w-full text-left min-w-[600px]">
                             <thead className="bg-gray-50 text-gray-500 text-sm">
                                 <tr>
                                     <th className="p-4">Date</th>
