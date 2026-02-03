@@ -7,7 +7,3 @@ certifi
 dnspython
 gunicorn
 werkzeug
-tensorflow
-numpy
-pillow
-keras
