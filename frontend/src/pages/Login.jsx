@@ -35,7 +35,7 @@ const Login = () => {
     };
 
     return (
-        <div className="flex justify-center items-center min-h-[calc(100vh-120px)] px-4">
+        <div className="flex justify-center items-center min-h-screen pt-24 pb-12 px-4">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
