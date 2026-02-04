@@ -11,7 +11,7 @@ const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview'); // overview, users, transactions
     const [loading, setLoading] = useState(true);
     const token = localStorage.getItem('token');
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const API_URL = import.meta.env.VITE_API_URL || 'https://form-tech-backend.onrender.com';
 
     useEffect(() => {
         fetchStats();

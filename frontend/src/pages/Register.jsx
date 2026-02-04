@@ -9,7 +9,7 @@ const Register = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'buyer' });
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const API_URL = import.meta.env.VITE_API_URL || 'https://form-tech-backend.onrender.com';
 
     const handleRegister = async (e) => {
         e.preventDefault();
