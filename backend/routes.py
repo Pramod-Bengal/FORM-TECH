@@ -332,9 +332,12 @@ def add_product():
         image_url = ""
         if 'image' in request.files:
             f = request.files['image']
-            filename = secure_filename(f.filename)
-            f.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-            image_url = f"/uploads/{filename}"
+            # Convert to Base64 for persistence on ephemeral filesystems (Render)
+            import base64
+            img_data = f.read()
+            encoded_img = base64.b64encode(img_data).decode('utf-8')
+            mime_type = f.content_type or 'image/jpeg'
+            image_url = f"data:{mime_type};base64,{encoded_img}"
             
         quality_score = float(request.form.get('quality_score', 0))
         status = 'approved' if quality_score > 60 else 'pending'

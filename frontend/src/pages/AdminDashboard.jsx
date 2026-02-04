@@ -113,7 +113,7 @@ const AdminDashboard = () => {
                                 pendingProducts.map(p => (
                                     <div key={p.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4">
                                         <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden shrink-0">
-                                            {p.image ? <img src={`${API_URL}${p.image}`} className="w-full h-full object-cover" /> : <div className="h-full flex items-center justify-center text-xs">No Img</div>}
+                                            {p.image ? <img src={p.image.startsWith('data:') || p.image.startsWith('http') ? p.image : `${API_URL}${p.image}`} className="w-full h-full object-cover" /> : <div className="h-full flex items-center justify-center text-xs">No Img</div>}
                                         </div>
                                         <div className="flex-1">
                                             <h3 className="font-bold text-lg">{p.name}</h3>

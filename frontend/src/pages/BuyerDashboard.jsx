@@ -110,7 +110,7 @@ const BuyerDashboard = () => {
                             <div key={p.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group">
                                 <div className="h-48 bg-gray-100 relative overflow-hidden">
                                     {p.image ? (
-                                        <img src={`${API_URL}${p.image}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        <img src={p.image.startsWith('data:') || p.image.startsWith('http') ? p.image : `${API_URL}${p.image}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-gray-400">Fresh {p.name}</div>
                                     )}

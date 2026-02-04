@@ -97,7 +97,7 @@ const FarmerDashboard = () => {
                     products.map((p) => (
                         <div key={p.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                             <div className="h-40 bg-gray-100 relative">
-                                {p.image ? <img src={`${API_URL}${p.image}`} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-gray-400">No Img</div>}
+                                {p.image ? <img src={p.image.startsWith('data:') || p.image.startsWith('http') ? p.image : `${API_URL}${p.image}`} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-gray-400">No Img</div>}
                                 <span className={`absolute top-2 right-2 px-2 py-1 text-xs font-bold rounded-full ${p.status === 'approved' ? 'bg-green-100 text-green-700' : p.status === 'refused' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>{p.status}</span>
                             </div>
                             <div className="p-4">
