@@ -13,6 +13,7 @@ const BuyerDashboard = () => {
     const [paymentStep, setPaymentStep] = useState('initial'); // initial, payment_details, processing, success
     const [upiId, setUpiId] = useState('');
     const [paymentProof, setPaymentProof] = useState('');
+    const [address, setAddress] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
     const handleImageUpload = (e) => {
@@ -54,6 +55,7 @@ const BuyerDashboard = () => {
                     product_id: orderModal.id,
                     quantity: parseFloat(qty),
                     payment_method: 'GPay',
+                    delivery_address: address,
                     upi_id: upiId,
                     payment_proof: paymentProof
                 },
@@ -65,6 +67,7 @@ const BuyerDashboard = () => {
                 setPaymentStep('initial');
                 setUpiId('');
                 setPaymentProof('');
+                setAddress('');
                 fetchProducts();
                 toast.success('Order Placed Successfully!');
             }, 2000);
@@ -76,6 +79,7 @@ const BuyerDashboard = () => {
 
     const handleNextStep = (e) => {
         e.preventDefault();
+        if (!address.trim()) return toast.error("Please enter delivery address");
         setPaymentStep('payment_details');
     };
 
@@ -218,6 +222,17 @@ const BuyerDashboard = () => {
                                 <div className="flex justify-between items-center mb-4 bg-gray-50 p-3 rounded-lg">
                                     <span className="font-medium">Total:</span>
                                     <span className="font-bold text-xl text-primary-600">₹{(qty * orderModal.price).toFixed(2)}</span>
+                                </div>
+
+                                <div className="mb-4">
+                                    <label className="block text-sm font-bold mb-2">Delivery Address <span className="text-red-500">*</span></label>
+                                    <textarea
+                                        className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary-500 outline-none resize-none"
+                                        rows="2"
+                                        placeholder="Enter full delivery address..."
+                                        value={address}
+                                        onChange={e => setAddress(e.target.value)}
+                                    ></textarea>
                                 </div>
 
                                 <div className="mb-6">

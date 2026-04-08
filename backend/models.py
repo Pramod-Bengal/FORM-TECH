@@ -23,5 +23,8 @@ class Order(Document):
     quantity = FloatField(required=True)
     total_price = FloatField(required=True)
     payment_method = StringField(required=True)
+    delivery_address = StringField(required=True)
+    upi_id = StringField()
+    payment_proof = StringField()
     status = StringField(default='completed')
     created_at = DateTimeField(default=datetime.utcnow)
