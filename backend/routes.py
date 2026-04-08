@@ -231,9 +231,6 @@ def place_order():
     if not product or product.quantity < data['quantity']:
         return jsonify({"msg": "Unavailable"}), 400
     
-    if 'delivery_address' not in data or not data['delivery_address']:
-         return jsonify({"msg": "Delivery address is required"}), 400
-        
     total_price = data['quantity'] * product.market_price
     
     order = Order(
@@ -241,8 +238,7 @@ def place_order():
         product=product,
         quantity=data['quantity'],
         total_price=total_price,
-        payment_method=data.get('payment_method', 'Cash'),
-        delivery_address=data['delivery_address']
+        payment_method=data.get('payment_method', 'Cash')
     )
     product.quantity -= data['quantity']
     product.save()

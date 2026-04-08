@@ -9,12 +9,8 @@ const BuyerDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [orderModal, setOrderModal] = useState(null);
     const [qty, setQty] = useState(1);
-    const [paymentMethod, setPaymentMethod] = useState('UPI');
+    const [paymentMethod, setPaymentMethod] = useState('GPay');
     const [paymentStep, setPaymentStep] = useState('initial'); // initial, processing, success
-    const [upiId, setUpiId] = useState('');
-    const [cardDetails, setCardDetails] = useState({ number: '', expiry: '', cvv: '' });
-    const [selectedBank, setSelectedBank] = useState('');
-    const [address, setAddress] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const token = localStorage.getItem('token');
     const API_URL = import.meta.env.VITE_API_URL || 'https://form-tech-backend.onrender.com';
@@ -44,8 +40,7 @@ const BuyerDashboard = () => {
                 {
                     product_id: orderModal.id,
                     quantity: parseFloat(qty),
-                    payment_method: paymentMethod === 'NetBanking' ? `NetBanking - ${selectedBank}` : paymentMethod,
-                    delivery_address: address
+                    payment_method: 'GPay'
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -53,9 +48,6 @@ const BuyerDashboard = () => {
             setTimeout(() => {
                 setOrderModal(null);
                 setPaymentStep('initial');
-                setAddress('');
-                setUpiId('');
-                setCardDetails({ number: '', expiry: '', cvv: '' });
                 fetchProducts();
                 toast.success('Order Placed Successfully!');
             }, 2000);
@@ -67,12 +59,6 @@ const BuyerDashboard = () => {
 
     const handleNextStep = (e) => {
         e.preventDefault();
-        if (!address.trim()) return toast.error("Please enter delivery address");
-
-        if (paymentMethod === 'UPI' && !upiId.includes('@')) return toast.error("Enter valid UPI ID");
-        if (paymentMethod === 'Card' && cardDetails.number.length < 16) return toast.error("Enter valid Card Number");
-        if (paymentMethod === 'NetBanking' && (!selectedBank || selectedBank === 'Select Bank')) return toast.error("Please select a bank");
-
         processPaymentAndOrder();
     };
 
@@ -162,112 +148,24 @@ const BuyerDashboard = () => {
                                     <span className="font-bold text-xl text-primary-600">₹{(qty * orderModal.price).toFixed(2)}</span>
                                 </div>
 
-                                <div className="mb-4">
-                                    <label className="block text-sm font-bold mb-2">Delivery Address</label>
-                                    <textarea
-                                        className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary-500 outline-none resize-none"
-                                        rows="2"
-                                        placeholder="Enter full delivery address..."
-                                        value={address}
-                                        onChange={e => setAddress(e.target.value)}
-                                    ></textarea>
-                                </div>
-
                                 <div className="mb-6">
                                     <label className="block text-sm font-bold mb-2">Payment Method</label>
-                                    <div className="grid grid-cols-2 gap-3 mb-4">
-                                        <label className={`flex items-center gap-2 cursor-pointer border p-2 rounded-lg ${paymentMethod === 'UPI' ? 'bg-primary-50 border-primary-500' : 'hover:bg-gray-50'}`}>
-                                            <input type="radio" name="payment" value="UPI" checked={paymentMethod === 'UPI'} onChange={e => setPaymentMethod(e.target.value)} /> UPI
-                                        </label>
-                                        <label className={`flex items-center gap-2 cursor-pointer border p-2 rounded-lg ${paymentMethod === 'GPay' ? 'bg-primary-50 border-primary-500' : 'hover:bg-gray-50'}`}>
-                                            <input type="radio" name="payment" value="GPay" checked={paymentMethod === 'GPay'} onChange={e => setPaymentMethod(e.target.value)} /> GPay
-                                        </label>
-                                        <label className={`flex items-center gap-2 cursor-pointer border p-2 rounded-lg ${paymentMethod === 'Card' ? 'bg-primary-50 border-primary-500' : 'hover:bg-gray-50'}`}>
-                                            <input type="radio" name="payment" value="Card" checked={paymentMethod === 'Card'} onChange={e => setPaymentMethod(e.target.value)} /> Card
-                                        </label>
-                                        <label className={`flex items-center gap-2 cursor-pointer border p-2 rounded-lg ${paymentMethod === 'NetBanking' ? 'bg-primary-50 border-primary-500' : 'hover:bg-gray-50'}`}>
-                                            <input type="radio" name="payment" value="NetBanking" checked={paymentMethod === 'NetBanking'} onChange={e => setPaymentMethod(e.target.value)} /> Net Banking
-                                        </label>
-                                        <label className={`col-span-2 flex items-center gap-2 cursor-pointer border p-2 rounded-lg ${paymentMethod === 'Cash' ? 'bg-primary-50 border-primary-500' : 'hover:bg-gray-50'}`}>
-                                            <input type="radio" name="payment" value="Cash" checked={paymentMethod === 'Cash'} onChange={e => setPaymentMethod(e.target.value)} /> Cash on Delivery
-                                        </label>
-                                    </div>
-
-                                    {/* Conditional Inputs */}
-                                    {paymentMethod === 'UPI' && (
-                                        <input
-                                            type="text"
-                                            placeholder="Enter UPI ID (e.g. user@okaxis)"
-                                            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary-500 outline-none"
-                                            value={upiId}
-                                            onChange={e => setUpiId(e.target.value)}
-                                        />
-                                    )}
-                                    {paymentMethod === 'GPay' && (
-                                        <div className="text-center p-2 bg-gray-50 rounded-lg border border-gray-200">
-                                            <p className="text-sm text-gray-500 mb-2">Securely pay with Google Pay</p>
-                                            <button onClick={handleNextStep} className="w-full bg-black text-white py-2 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors">
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-blue-400 font-bold">G</span>
-                                                    <span className="text-red-400 font-bold">P</span>
-                                                    <span className="text-yellow-400 font-bold">a</span>
-                                                    <span className="text-green-400 font-bold">y</span>
-                                                </div>
-                                                Pay Now
-                                            </button>
-                                        </div>
-                                    )}
-                                    {paymentMethod === 'NetBanking' && (
-                                        <select
-                                            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary-500 outline-none"
-                                            value={selectedBank}
-                                            onChange={e => setSelectedBank(e.target.value)}
-                                        >
-                                            <option>Select Bank</option>
-                                            <option>State Bank of India</option>
-                                            <option>HDFC Bank</option>
-                                            <option>ICICI Bank</option>
-                                            <option>Axis Bank</option>
-                                        </select>
-                                    )}
-                                    {paymentMethod === 'Card' && (
-                                        <div className="space-y-2">
-                                            <input
-                                                type="text"
-                                                placeholder="Card Number"
-                                                className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary-500 outline-none"
-                                                value={cardDetails.number}
-                                                maxLength="16"
-                                                onChange={e => setCardDetails({ ...cardDetails, number: e.target.value })}
-                                            />
-                                            <div className="flex gap-2">
-                                                <input
-                                                    type="text"
-                                                    placeholder="MM/YY"
-                                                    className="w-1/2 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary-500 outline-none"
-                                                    value={cardDetails.expiry}
-                                                    onChange={e => setCardDetails({ ...cardDetails, expiry: e.target.value })}
-                                                />
-                                                <input
-                                                    type="password"
-                                                    placeholder="CVV"
-                                                    className="w-1/2 border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary-500 outline-none"
-                                                    value={cardDetails.cvv}
-                                                    maxLength="3"
-                                                    onChange={e => setCardDetails({ ...cardDetails, cvv: e.target.value })}
-                                                />
+                                    <div className="text-center p-2 bg-gray-50 rounded-lg border border-gray-200">
+                                        <p className="text-sm text-gray-500 mb-2">Securely pay with Google Pay</p>
+                                        <button onClick={handleNextStep} className="w-full bg-black text-white py-2 rounded-full font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors">
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-blue-400 font-bold">G</span>
+                                                <span className="text-red-400 font-bold">P</span>
+                                                <span className="text-yellow-400 font-bold">a</span>
+                                                <span className="text-green-400 font-bold">y</span>
                                             </div>
-                                        </div>
-                                    )}
+                                            Pay Now
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <div className="flex gap-3">
+                                <div className="flex gap-3 mt-4">
                                     <button onClick={() => setOrderModal(null)} className="flex-1 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-lg">Cancel</button>
-                                    {paymentMethod !== 'GPay' && (
-                                        <button onClick={handleNextStep} className="flex-1 bg-primary-600 text-white py-2 rounded-lg font-bold hover:bg-primary-700">
-                                            {paymentMethod === 'Cash' ? 'Confirm Order' : 'Pay Now'}
-                                        </button>
-                                    )}
                                 </div>
                             </>
                         )}
