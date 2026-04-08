@@ -57,7 +57,7 @@ const Login = () => {
                             placeholder="Email Address"
                             className="input-field pl-12"
                             required
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                            onChange={e => setFormData({ ...formData, email: e.target.value.trim() })}
                         />
                     </div>
                     <div className="relative">

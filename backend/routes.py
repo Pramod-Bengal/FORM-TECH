@@ -21,13 +21,14 @@ def calculate_price(farmer_price_per_kg, quantity):
 def register():
     try:
         data = request.get_json()
-        if User.objects(email=data['email']).first():
+        email = data.get('email', '').strip().lower()
+        if User.objects(email=email).first():
             return jsonify({"msg": "Email already exists"}), 400
         
         hashed_password = generate_password_hash(data['password'])
         new_user = User(
             name=data['name'],
-            email=data['email'],
+            email=email,
             password=hashed_password,
             role=data.get('role', 'buyer')
         )
@@ -39,7 +40,8 @@ def register():
 @api.route('/api/auth/login', methods=['POST'])
 def login():
     data = request.get_json()
-    user = User.objects(email=data['email']).first()
+    email = data.get('email', '').strip().lower()
+    user = User.objects(email=email).first()
     if user and check_password_hash(user.password, data['password']):
         identity_dict = {'id': str(user.id), 'role': user.role, 'name': user.name}
         access_token = create_access_token(identity=json.dumps(identity_dict))
