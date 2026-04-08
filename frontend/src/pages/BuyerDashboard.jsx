@@ -10,8 +10,21 @@ const BuyerDashboard = () => {
     const [orderModal, setOrderModal] = useState(null);
     const [qty, setQty] = useState(1);
     const [paymentMethod, setPaymentMethod] = useState('GPay');
-    const [paymentStep, setPaymentStep] = useState('initial'); // initial, processing, success
+    const [paymentStep, setPaymentStep] = useState('initial'); // initial, payment_details, processing, success
+    const [upiId, setUpiId] = useState('');
+    const [paymentProof, setPaymentProof] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPaymentProof(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
     const token = localStorage.getItem('token');
     const API_URL = import.meta.env.VITE_API_URL || 'https://form-tech-backend.onrender.com';
 
@@ -40,7 +53,9 @@ const BuyerDashboard = () => {
                 {
                     product_id: orderModal.id,
                     quantity: parseFloat(qty),
-                    payment_method: 'GPay'
+                    payment_method: 'GPay',
+                    upi_id: upiId,
+                    payment_proof: paymentProof
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -48,6 +63,8 @@ const BuyerDashboard = () => {
             setTimeout(() => {
                 setOrderModal(null);
                 setPaymentStep('initial');
+                setUpiId('');
+                setPaymentProof('');
                 fetchProducts();
                 toast.success('Order Placed Successfully!');
             }, 2000);
@@ -59,6 +76,12 @@ const BuyerDashboard = () => {
 
     const handleNextStep = (e) => {
         e.preventDefault();
+        setPaymentStep('payment_details');
+    };
+
+    const handleConfirmPayment = (e) => {
+        e.preventDefault();
+        if (!upiId.trim()) return toast.error("Please enter your UPI ID");
         processPaymentAndOrder();
     };
 
@@ -127,6 +150,55 @@ const BuyerDashboard = () => {
             {orderModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-2xl p-6 max-w-sm w-full">
+                        {paymentStep === 'payment_details' && (
+                            <>
+                                <h2 className="text-xl font-bold mb-4 text-center">Complete Payment</h2>
+                                <div className="text-center mb-6">
+                                    <p className="text-gray-600 mb-2">Scan the QR code below to pay <strong className="text-xl text-primary-600">₹{(qty * orderModal.price).toFixed(2)}</strong></p>
+                                    <div className="w-48 h-48 bg-gray-100 rounded-xl mx-auto overflow-hidden border-2 border-primary-100 flex items-center justify-center p-2 mb-4">
+                                        <img 
+                                            src={`${API_URL}/uploads/WhatsApp%20Image%202026-04-08%20at%209.32.26%20AM.jpeg`} 
+                                            alt="GPay QR Code" 
+                                            className="max-w-full max-h-full object-contain"
+                                            onError={(e) => {
+                                                e.target.onerror = null; 
+                                                e.target.src = "https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg"; // Fallback QR
+                                            }}
+                                        />
+                                    </div>
+                                    <p className="text-sm text-gray-500 mb-4">After payment, please fill the details below.</p>
+                                </div>
+                                
+                                <div className="space-y-4 mb-6">
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1">Your UPI ID <span className="text-red-500">*</span></label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. yourname@okbank"
+                                            className="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-primary-500 outline-none"
+                                            value={upiId}
+                                            onChange={e => setUpiId(e.target.value)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-bold mb-1">Payment Screenshot (Optional)</label>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer"
+                                        />
+                                        {paymentProof && <p className="text-xs text-green-600 mt-1">✓ Screenshot attached</p>}
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-3 mt-4">
+                                    <button onClick={() => setPaymentStep('initial')} className="flex-1 py-2 text-gray-500 font-bold hover:bg-gray-100 rounded-lg">Back</button>
+                                    <button onClick={handleConfirmPayment} className="flex-1 bg-primary-600 text-white py-2 rounded-lg font-bold hover:bg-primary-700">Submit Details</button>
+                                </div>
+                            </>
+                        )}
+
                         {paymentStep === 'initial' && (
                             <>
                                 <h2 className="text-xl font-bold mb-4">Confirm Order</h2>
