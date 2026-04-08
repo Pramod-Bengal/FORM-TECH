@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ShieldCheck, CheckCircle, XCircle, TrendingUp, Users, Package, ShoppingBag } from 'lucide-react';
+import { ShieldCheck, CheckCircle, XCircle, TrendingUp, Users, Package, ShoppingBag, Image } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AdminDashboard = () => {
@@ -195,7 +195,7 @@ const AdminDashboard = () => {
                                     <th className="p-4">Product</th>
                                     <th className="p-4">Farmer</th>
                                     <th className="p-4">Amount</th>
-                                    <th className="p-4">Method</th>
+                                    <th className="p-4">Method & Details</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -207,7 +207,15 @@ const AdminDashboard = () => {
                                         <td className="p-4 text-gray-600">{t.farmer}</td>
                                         <td className="p-4 font-bold text-green-600">₹{t.amount}</td>
                                         <td className="p-4">
-                                            <span className="bg-gray-100 px-2 py-1 rounded text-xs font-medium text-gray-600">{t.payment_method}</span>
+                                            <div className="flex flex-col gap-1 items-start">
+                                                <span className="bg-gray-100 px-2 py-1 rounded text-xs font-medium text-gray-600">{t.payment_method}</span>
+                                                {t.upi_id && <span className="text-[10px] text-gray-500 font-mono">UPI: {t.upi_id}</span>}
+                                                {t.payment_proof && (
+                                                    <a href={t.payment_proof.startsWith('data:') ? t.payment_proof : `${API_URL}${t.payment_proof}`} target="_blank" rel="noopener noreferrer" className="text-xs text-primary-600 font-bold flex items-center gap-1 hover:underline mt-1 bg-primary-50 px-2 py-1 rounded">
+                                                        <Image size={12} /> View Proof
+                                                    </a>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}

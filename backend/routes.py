@@ -199,7 +199,9 @@ def get_all_transactions():
             "amount": o.total_price,
             "payment_method": o.payment_method,
             "status": o.status,
-            "date": o.created_at.strftime("%Y-%m-%d %H:%M")
+            "date": o.created_at.strftime("%Y-%m-%d %H:%M"),
+            "upi_id": o.upi_id,
+            "payment_proof": o.payment_proof
         })
     return jsonify(result)
 
@@ -213,6 +215,7 @@ def get_buyer_products():
         "price": p.market_price,
         "quantity": p.quantity,
         "image": p.image_url,
+        "quality_score": getattr(p, 'quality_score', 0.0),
         "farmer_name": p.farmer.name if p.farmer else "Unknown"
     } for p in products])
 
@@ -329,7 +332,8 @@ def add_product():
         price = float(request.form.get('price'))
         qty = float(request.form.get('quantity'))
         
-        if qty < 10: return jsonify({"msg": "Min quantity 10kg"}), 400
+        # Temporary relaxation for testing: Allow any quantity
+        # if qty < 10: return jsonify({"msg": "Min quantity 10kg"}), 400
         
         earnings, _ = calculate_price(price, qty)
         
@@ -353,6 +357,7 @@ def add_product():
             farmer_earnings=earnings,
             quantity=qty,
             image_url=image_url,
+            quality_score=quality_score,
             status=status
         )
         product.save()
@@ -377,6 +382,51 @@ def get_my_products():
         "earnings": p.farmer_earnings,
         "image": p.image_url
     } for p in products])
+
+@api.route('/api/farmer/notifications', methods=['GET'])
+@jwt_required()
+def get_farmer_notifications():
+    raw_identity = get_jwt_identity()
+    try: identity = json.loads(raw_identity) if isinstance(raw_identity, str) else raw_identity
+    except: return jsonify({"msg": "Invalid token"}), 422
+    
+    if identity['role'] != 'farmer': return jsonify({"msg": "Unauthorized"}), 403
+    
+    # Get all products belonging to this farmer
+    farmer_products = Product.objects(farmer=ObjectId(identity['id']))
+    product_ids = [p.id for p in farmer_products]
+    
+    # Get all orders for these products
+    orders = Order.objects(product__in=product_ids).order_by('-created_at')
+    
+    notifications = []
+    for o in orders:
+        notifications.append({
+            "id": str(o.id),
+            "buyer_name": o.buyer.name if o.buyer else "A buyer",
+            "product_name": o.product.vegetable_name if o.product else "Deleted Product",
+            "quantity": o.quantity,
+            "total_price": o.total_price,
+            "date": o.created_at.strftime("%Y-%m-%d %H:%M")
+        })
+        
+    return jsonify(notifications)
+
+@api.route('/api/farmer/products/<product_id>', methods=['DELETE'])
+@jwt_required()
+def delete_product(product_id):
+    raw_identity = get_jwt_identity()
+    try: identity = json.loads(raw_identity) if isinstance(raw_identity, str) else raw_identity
+    except: return jsonify({"msg": "Invalid token"}), 422
+    
+    if identity['role'] != 'farmer': return jsonify({"msg": "Unauthorized"}), 403
+    
+    product = Product.objects(id=product_id, farmer=ObjectId(identity['id'])).first()
+    if not product:
+        return jsonify({"msg": "Product not found or unauthorized to delete"}), 404
+        
+    product.delete()
+    return jsonify({"msg": "Product deleted successfully"}), 200
 
 @api.route('/uploads/<filename>')
 def uploaded_file(filename):

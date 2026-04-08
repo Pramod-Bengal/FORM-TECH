@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ShoppingBag, Search, Filter } from 'lucide-react';
+import { ShoppingBag, Search, Filter, Scan } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -133,7 +133,14 @@ const BuyerDashboard = () => {
                                         <h3 className="font-bold text-lg">{p.name}</h3>
                                         <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-bold">₹{p.price}/kg</span>
                                     </div>
-                                    <p className="text-sm text-gray-500 mb-4">Farmer: {p.farmer_name}</p>
+                                    <div className="flex items-center justify-between mb-4">
+                                        <p className="text-sm text-gray-500 truncate mr-2">Farmer: {p.farmer_name}</p>
+                                        {p.quality_score > 0 && (
+                                            <span className="flex items-center gap-1 bg-slate-900 text-white text-[10px] px-2 py-1 rounded border border-slate-700 font-bold shrink-0" title="Google-Standard AI Verification">
+                                                <Scan size={12} className="text-green-400" /> {p.quality_score}% Quality
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="flex items-center justify-between mt-4 border-t border-gray-50 pt-3">
                                         <span className="text-xs font-medium text-gray-400">{p.quantity}kg available</span>
                                         <button

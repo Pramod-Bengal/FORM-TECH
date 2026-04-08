@@ -14,6 +14,7 @@ class Product(Document):
     farmer_earnings = FloatField(required=True) # Price farmer gets (market_price - transport)
     quantity = FloatField(required=True)
     image_url = StringField()
+    quality_score = FloatField(default=0.0)
     status = StringField(default='pending') # 'pending', 'approved', 'refused'
     created_at = DateTimeField(default=datetime.utcnow)
 

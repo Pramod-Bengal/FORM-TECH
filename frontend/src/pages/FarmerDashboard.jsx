@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Package, IndianRupee, Info, TrendingUp, Scan } from 'lucide-react';
+import { Plus, Package, IndianRupee, Info, TrendingUp, Scan, Bell, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const FarmerDashboard = () => {
     const [products, setProducts] = useState([]);
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
     const [showAddForm, setShowAddForm] = useState(false);
     const [newProduct, setNewProduct] = useState({ name: '', price: '', quantity: '', image: null });
     const [qualityAnalysis, setQualityAnalysis] = useState({ loading: false, result: null });
@@ -13,7 +16,23 @@ const FarmerDashboard = () => {
     const token = localStorage.getItem('token');
     const API_URL = import.meta.env.VITE_API_URL || 'https://form-tech-backend.onrender.com';
 
-    useEffect(() => { fetchMyProducts(); }, []);
+    useEffect(() => { 
+        fetchMyProducts(); 
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        try {
+            const { data } = await axios.get(`${API_URL}/api/farmer/notifications`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setNotifications(data);
+            
+            const seenCount = parseInt(localStorage.getItem('seen_notifications') || '0');
+            const unread = Math.max(0, data.length - seenCount);
+            setUnreadCount(unread);
+        } catch (err) { console.error('Failed to fetch notifications'); }
+    };
 
     const fetchMyProducts = async () => {
         try {
@@ -78,6 +97,19 @@ const FarmerDashboard = () => {
         finally { setLoading(false); }
     };
 
+    const handleDeleteProduct = async (productId) => {
+        if (!window.confirm('Are you sure you want to delete this product?')) return;
+        try {
+            await axios.delete(`${API_URL}/api/farmer/products/${productId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Product deleted successfully');
+            fetchMyProducts();
+        } catch (err) {
+            toast.error('Failed to delete product');
+        }
+    };
+
     const farmerEarnings = newProduct.price ? Math.max(0, parseFloat(newProduct.price) - 5) : 0;
 
     return (
@@ -85,12 +117,61 @@ const FarmerDashboard = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold">Farmer Dashboard</h1>
-                    <p className="text-gray-500">Manage your produce</p>
+                    <p className="text-gray-500">Manage your produce & track sales</p>
                 </div>
-                <button onClick={() => setShowAddForm(true)} className="w-full md:w-auto bg-primary-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary-700 shadow-lg shadow-primary-200">
-                    <Plus size={20} /> Add Crop
-                </button>
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <button onClick={() => {
+                        setShowNotifications(!showNotifications);
+                        if (!showNotifications) {
+                            setUnreadCount(0);
+                            localStorage.setItem('seen_notifications', notifications.length.toString());
+                        }
+                    }} className="relative p-3 bg-white rounded-full shadow-sm hover:bg-gray-50 border border-gray-100 flex-shrink-0 transition-colors">
+                        <Bell size={24} className={showNotifications ? "text-primary-600" : "text-gray-600"} />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-full font-bold shadow-sm">
+                                {unreadCount}
+                            </span>
+                        )}
+                    </button>
+                    <button onClick={() => setShowAddForm(true)} className="flex-1 md:flex-none bg-primary-600 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary-700 shadow-lg shadow-primary-200">
+                        <Plus size={20} /> Add Crop
+                    </button>
+                </div>
             </div>
+
+            {/* Notifications Section */}
+            <AnimatePresence>
+                {showNotifications && (
+                    <motion.div initial={{ opacity: 0, y: -10, height: 0 }} animate={{ opacity: 1, y: 0, height: 'auto' }} exit={{ opacity: 0, y: -10, height: 0 }} className="overflow-hidden mb-8">
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                                <Bell className="text-primary-600" /> Recent Sales Notifications
+                            </h2>
+                            {notifications.length === 0 ? (
+                                <p className="text-gray-500 text-sm py-4">No sales recorded yet. Your latest sales will appear here.</p>
+                            ) : (
+                                <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                                    {notifications.map((notif, idx) => (
+                                        <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100 gap-3 hover:bg-slate-100 transition-colors">
+                                            <div>
+                                                <p className="font-semibold text-slate-800 text-sm md:text-base">
+                                                    <span className="text-primary-600">{notif.buyer_name}</span> purchased <span className="font-bold">{notif.quantity}kg</span> of {notif.product_name}
+                                                </p>
+                                                <p className="text-xs text-gray-500 mt-1">{notif.date}</p>
+                                            </div>
+                                            <div className="text-left sm:text-right bg-white px-3 py-2 rounded-lg border border-slate-100">
+                                                <p className="text-[10px] text-gray-400 uppercase font-bold">Total Order Value</p>
+                                                <p className="font-bold text-lg text-primary-700">₹{notif.total_price}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {products.length === 0 ? <p className="text-gray-400 col-span-3 text-center py-10">No products listed yet.</p> :
@@ -103,9 +184,18 @@ const FarmerDashboard = () => {
                             <div className="p-4">
                                 <h3 className="font-bold text-lg">{p.name}</h3>
                                 <p className="text-sm text-gray-500">{p.quantity}kg • ₹{p.price}/kg</p>
-                                <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between">
-                                    <span className="text-xs text-primary-600 font-bold uppercase">Net Earnings</span>
-                                    <span className="font-bold text-primary-700">₹{p.earnings}/kg</span>
+                                <div className="mt-3 pt-3 border-t border-gray-50 flex justify-between items-center">
+                                    <div>
+                                        <span className="block text-xs text-primary-600 font-bold uppercase">Net Earnings</span>
+                                        <span className="font-bold text-primary-700">₹{p.earnings}/kg</span>
+                                    </div>
+                                    <button 
+                                        onClick={() => handleDeleteProduct(p.id)}
+                                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                                        title="Delete Product"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
                                 </div>
                             </div>
                         </div>
