@@ -1,4 +1,4 @@
- AgriMarket
+AgriMarket
  
 AgriMarket is a modern, end-to-end B2B and B2C agricultural marketplace that connects local farmers directly with buyers. By bypassing middlemen, AgriMarket ensures farmers earn fair prices for their produce while buyers receive fresh, verified goods with transparent pricing.
 The platform includes a simulated **AI Crop Quality Assessment** tool, helping automate the verification process and grade produce transparently.
